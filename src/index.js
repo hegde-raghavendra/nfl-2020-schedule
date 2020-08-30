@@ -4,8 +4,11 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const {startDatabase} = require('./database/mongo');
-const {insertAd, getAds,deleteAd, updateAd} = require('./database/ads');
+const { insertSchedule, getSchedules, deleteSchedule, updateSchedule, getSchedulesByWeek, insertSchedules } =
+  require('./database/nfl2020Schedule');
+
+if (process.env.NODE_ENV !== 'production') require('dotenv').config();
+
 
 // defining the Express app
 const app = express();
@@ -22,35 +25,41 @@ app.use(cors());
 // adding morgan to log HTTP requests
 app.use(morgan('combined'));
 
-app.get('/', async (req, res) => {
-  res.send(await getAds());
+app.get('/schedules', async (req, res) => {
+  res.send(await getSchedules());
 });
 
-app.post('/', async (req, res) => {
-  const newAd = req.body;
-  await insertAd(newAd);
-  res.send({ message: 'New ad inserted.' });
+app.get('/schedules/week/:week', async (req, res) => {
+  res.send(await getSchedulesByWeek(req.params.week));
+});
+
+app.post('/schedules', async (req, res) => {
+  const newSchedule = req.body;
+  await insertSchedule(newSchedule);
+  res.send({ message: 'New schedule inserted.' });
+});
+
+app.post('/schedules/insertMany', async (req, res) => {
+  const newSchedules = req.body;
+  await insertSchedules(newSchedules);
+  res.send({ message: 'New schedules inserted.' });
 });
 
 // endpoint to delete an ad
-app.delete('/:id', async (req, res) => {
-  await deleteAd(req.params.id);
-  res.send({ message: 'Ad removed.' });
+app.delete('/schedules/:id', async (req, res) => {
+  await deleteSchedule(req.params.id);
+  res.send({ message: 'Schedule removed.' });
 });
 
 // endpoint to update an ad
-app.put('/:id', async (req, res) => {
-  const updatedAd = req.body;
-  await updateAd(req.params.id, updatedAd);
-  res.send({ message: 'Ad updated.' });
+app.put('/schedules/:id', async (req, res) => {
+  const updatedSchedule = req.body;
+  await updateSchedule(req.params.id, updatedSchedule);
+  res.send({ message: 'Schedule updated.' });
 });
 
-// start the in-memory MongoDB instance
-startDatabase().then(async () => {
-  await insertAd({title: 'Hello, now from the in-memory database!'});
-
-  // start the server
-  app.listen(3001, async () => {
-    console.log('listening on port 3001');
-  });
+// start the server
+app.listen(process.env.PORT, async () => {
+  console.log(`listening on port ${process.env.PORT}`);
 });
+
