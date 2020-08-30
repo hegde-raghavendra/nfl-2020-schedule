@@ -1,7 +1,5 @@
 const {MongoClient} = require('mongodb');
 
-if (process.env.NODE_ENV !== 'production') require('dotenv').config();
-
 let database = null;
 
 const uri = process.env.MONGODB_URL;

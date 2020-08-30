@@ -7,9 +7,6 @@ const morgan = require('morgan');
 const { insertSchedule, getSchedules, deleteSchedule, updateSchedule, getSchedulesByWeek, insertSchedules } =
   require('./database/nfl2020Schedule');
 
-if (process.env.NODE_ENV !== 'production') require('dotenv').config();
-
-
 // defining the Express app
 const app = express();
 
